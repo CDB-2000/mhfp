@@ -12,7 +12,7 @@ class MHFPEncoder:
     prime = (1 << 61) - 1
     max_hash = (1 << 32) - 1
 
-    def __init__(self, n_permutations=2048, seed=42):
+    def __init__(self, n_permutations=2048, seed=42): #we're gonna use half the permutations, so consider changing default to 1024
         """All minhashes created using this instance will use the arguments
     supplied to the constructor.
 
@@ -108,7 +108,7 @@ class MHFPEncoder:
                 min_radius=min_radius,
             )
         )
-
+""" CHANGING THIS FUNCTION HERE!!!! """
     def from_molecular_shingling(self, tokens):
         """Creates the hash set for a string array and returns it without changing the hash values of
     this instance.
@@ -122,16 +122,18 @@ class MHFPEncoder:
 
         hash_values = np.zeros([self.n_permutations, 1], dtype=np.uint32)
         hash_values.fill(MHFPEncoder.max_hash)
+        #need to put the min hash here, which would default to the first hash value... 
 
-        for t in tokens:
-            t_h = struct.unpack("<I", sha1(t).digest()[:4])[0]
+        for t in tokens: #what are the tokens? I'm guessing it's the smiles extracted
+            t_h = struct.unpack("<I", sha1(t).digest()[:4])[0] #what is this function?
+            """okay so the process below is how to get the hash values, learn how that works."""
             hashes = np.remainder(
                 np.remainder(
                     self.permutations_a * t_h + self.permutations_b, MHFPEncoder.prime
                 ),
                 self.max_hash,
             )
-            hash_values = np.minimum(hash_values, hashes)
+            hash_values = np.minimum(hash_values, hashes) 
 
         return hash_values.reshape((1, self.n_permutations))[0]
 
